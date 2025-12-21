@@ -1,0 +1,27 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Pin -->
+  <path
+    d="M50 10C35.088 10 23 22.088 23 37C23 51.912 50 90 50 90C50 90 77 51.912 77 37C77 22.088 64.912 10 50 10Z"
+    fill="url(#logoGradient)"
+  />
+  
+  <!-- Cercle central -->
+  <circle cx="50" cy="37" r="15" fill="white" />
+  
+  <!-- Laptop -->
+  <path d="M42 32H58V40H42V32Z" fill="url(#logoGradient)" />
+  <path d="M40 41H60L61 43H39L40 41Z" fill="url(#logoGradient)" />
+  
+  <!-- Point -->
+  <path
+    d="M50 36C51.1 36 52 36.9 52 38C52 39.1 51.1 40 50 40C48.9 40 48 39.1 48 38C48 36.9 48.9 36 50 36Z"
+    fill="url(#logoGradient)"
+  />
+</svg>

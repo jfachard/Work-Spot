@@ -3,3 +3,52 @@
 @import 'tailwindcss/utilities.css';
 
 @import 'nativewind/theme';
+
+@theme {
+  /* 🎨 Brand Colors */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+
+  /* ✅ Semantic Colors */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #38BDF8;
+
+  /* 🎵 Spotify */
+  --color-spotify: #1DB954;
+
+  /* 🧱 Surfaces */
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F1F5F9;
+  --color-border: #E2E8F0;
+
+  /* ✍️ Text */
+  --color-text-title: #0F172A;
+  --color-text: #334155;
+  --color-text-muted: #64748B;
+  --color-text-disabled: #94A3B8;
+}
+
+/* ================================
+   🌙 Dark Mode Variables
+   ================================ */
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-bg: #020617;
+    --color-surface: #0F172A;
+    --color-surface-soft: #1E293B;
+    --color-border: #334155;
+
+    --color-text-title: #E5E7EB;
+    --color-text: #CBD5E1;
+    --color-text-muted: #94A3B8;
+    --color-text-disabled: #64748B;
+
+    /* Brand légèrement plus lumineux */
+    --color-primary: #3B82F6;
+    --color-primary-hover: #2563EB;
+  }
+}
