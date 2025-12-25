@@ -1,77 +1,52 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   // Hash bcrypt
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
   name      String
-  avatar    String?  // URL avatar
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  spots     Spot[]
-  reviews   Review[]
+  avatar    String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   favorites Favorite[]
+  reviews   Review[]
+  spots     Spot[]
 }
 
 model Spot {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  address     String
-  city        String
-  country     String   @default("France")
-  latitude    Float
-  longitude   Float
-  
-  // Features
-  hasWifi     Boolean  @default(false)
-  hasPower    Boolean  @default(false)
-  noiseLevel  NoiseLevel @default(MODERATE)
-  
-  // Info pratique
-  openingHours String? // Format JSON: {"mon": "8:00-20:00", ...}
-  priceRange   PriceRange @default(MODERATE)
-  
-  // Type de lieu
-  type        SpotType @default(CAFE)
-  
-  // Images
-  coverImage  String?  // URL image principale
-  images      String[] // Array d'URLs
-  
-  // Spotify
-  playlistUrl String?  // URL playlist Spotify recommandée
-  
-  // Stats
-  averageRating Float?  @default(0)
-  reviewCount   Int     @default(0)
-  
-  // Metadata
-  verified    Boolean  @default(false)
-  createdById String
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  reviews     Review[]
-  favorites   Favorite[]
-  
+  id            String     @id @default(uuid())
+  name          String
+  description   String?
+  address       String
+  city          String
+  country       String     @default("France")
+  latitude      Float
+  longitude     Float
+  hasWifi       Boolean    @default(false)
+  hasPower      Boolean    @default(false)
+  noiseLevel    NoiseLevel @default(MODERATE)
+  openingHours  String?
+  priceRange    PriceRange @default(MODERATE)
+  type          SpotType   @default(CAFE)
+  coverImage    String?
+  images        String[]
+  playlistUrl   String?
+  averageRating Float?     @default(0)
+  reviewCount   Int        @default(0)
+  verified      Boolean    @default(false)
+  createdById   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  favorites     Favorite[]
+  reviews       Review[]
+  createdBy     User       @relation(fields: [createdById], references: [id])
+
   @@index([latitude, longitude])
   @@index([city])
   @@index([type])
@@ -79,48 +54,43 @@ model Spot {
 
 model Review {
   id        String   @id @default(uuid())
-  rating    Int      // 1-5 étoiles
+  rating    Int
   comment   String?
-  images    String[] // URLs des photos
-  
-  // Relations
+  images    String[]
   spotId    String
-  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  @@unique([userId, spotId]) // Un user = 1 avis par spot
+  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, spotId])
   @@index([spotId])
 }
 
 model Favorite {
   id        String   @id @default(uuid())
-  
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   spotId    String
-  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
-  
   createdAt DateTime @default(now())
-  
-  @@unique([userId, spotId]) // Un user ne peut favoriser qu'une fois
+  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, spotId])
   @@index([userId])
 }
 
 enum NoiseLevel {
-  QUIET      // Silencieux (bibliothèque)
-  MODERATE   // Modéré (café calme)
-  LOUD       // Bruyant (café animé)
+  QUIET
+  MODERATE
+  LOUD
 }
 
 enum PriceRange {
-  FREE       // Gratuit (bibliothèque)
-  CHEAP      // €
-  MODERATE   // €€
-  EXPENSIVE  // €€€
+  FREE
+  CHEAP
+  MODERATE
+  EXPENSIVE
 }
 
 enum SpotType {
