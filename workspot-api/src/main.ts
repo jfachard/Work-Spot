@@ -13,7 +13,7 @@ async function bootstrap() {
     .setDescription('The WorkSpot API description')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('auth', 'Authentication related endpoints')
+    .addTag('Auth', 'Authentication related endpoints')
     .addTag('users', 'User management endpoints')
     .addTag('spots', 'Spots management endpoints')
     .addTag('reviews', 'Reviews management endpoints')
