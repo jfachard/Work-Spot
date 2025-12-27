@@ -14,9 +14,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('Auth', 'Authentication related endpoints')
-    .addTag('users', 'User management endpoints')
-    .addTag('spots', 'Spots management endpoints')
-    .addTag('reviews', 'Reviews management endpoints')
+    .addTag('Users', 'User management endpoints')
+    .addTag('Spots', 'Spots management endpoints')
+    .addTag('Reviews', 'Reviews management endpoints')
+    .addTag('Favorites', 'Favorites management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

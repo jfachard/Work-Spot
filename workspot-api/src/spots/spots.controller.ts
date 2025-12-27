@@ -16,7 +16,7 @@ import { UpdateSpotDto } from './dto/update-spot.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('spots')
+@ApiTags('Spots')
 @Controller('spots')
 export class SpotsController {
   constructor(private readonly spotsService: SpotsService) {}
