@@ -6,6 +6,7 @@ import { Map, Heart, User } from 'lucide-react-native';
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import { useTheme } from '../contexts/ThemeContext';
 
 export type TabParamList = {
   Explore: undefined;
@@ -16,12 +17,14 @@ export type TabParamList = {
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export default function TabNavigator() {
+  const { isDark } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#64748B',
+        tabBarActiveTintColor: isDark ? '#3B82F6' : '#2563EB',
+        tabBarInactiveTintColor: isDark ? '#94A3B8' : '#64748B',
         tabBarStyle: {
           position: 'absolute',
           borderTopWidth: 0,
@@ -33,13 +36,20 @@ export default function TabNavigator() {
         },
         tabBarBackground: () => (
           <BlurView
-            intensity={80}
-            tint="dark"
+            intensity={90}
+            tint={isDark ? 'dark' : 'light'}
             style={{
               ...StyleSheet.absoluteFillObject,
               overflow: 'hidden',
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
+              backgroundColor: Platform.OS === 'ios'
+                ? isDark
+                  ? 'rgba(15, 23, 42, 0.6)'  
+                  : 'rgba(255, 255, 255, 0.6)'
+                : isDark
+                  ? 'rgba(15, 23, 42, 0.85)'
+                  : 'rgba(255, 255, 255, 0.85)',
             }}
           />
         ),
