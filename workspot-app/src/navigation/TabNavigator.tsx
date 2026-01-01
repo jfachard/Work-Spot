@@ -5,7 +5,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { Map, Heart, User } from 'lucide-react-native';
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
+import ProfileNavigator from './ProfileNavigator';
 import { useTheme } from '../contexts/ThemeContext';
 
 export type TabParamList = {
@@ -43,13 +43,14 @@ export default function TabNavigator() {
               overflow: 'hidden',
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              backgroundColor: Platform.OS === 'ios'
-                ? isDark
-                  ? 'rgba(15, 23, 42, 0.6)'  
-                  : 'rgba(255, 255, 255, 0.6)'
-                : isDark
-                  ? 'rgba(15, 23, 42, 0.85)'
-                  : 'rgba(255, 255, 255, 0.85)',
+              backgroundColor:
+                Platform.OS === 'ios'
+                  ? isDark
+                    ? 'rgba(15, 23, 42, 0.6)'
+                    : 'rgba(255, 255, 255, 0.6)'
+                  : isDark
+                    ? 'rgba(15, 23, 42, 0.85)'
+                    : 'rgba(255, 255, 255, 0.85)',
             }}
           />
         ),
@@ -58,19 +59,14 @@ export default function TabNavigator() {
           fontWeight: '600',
           marginTop: -4,
         },
-      }}
-    >
+      }}>
       <Tab.Screen
         name="Explore"
         component={ExploreScreen}
         options={{
           tabBarLabel: 'Explorer',
           tabBarIcon: ({ color, size, focused }) => (
-            <Map 
-              color={color} 
-              size={focused ? 26 : 24} 
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <Map color={color} size={focused ? 26 : 24} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -80,8 +76,8 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'Favoris',
           tabBarIcon: ({ color, size, focused }) => (
-            <Heart 
-              color={color} 
+            <Heart
+              color={color}
               size={focused ? 26 : 24}
               strokeWidth={focused ? 2.5 : 2}
               fill={focused ? color : 'none'}
@@ -91,15 +87,11 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileNavigator}
         options={{
           tabBarLabel: 'Profil',
           tabBarIcon: ({ color, size, focused }) => (
-            <User 
-              color={color} 
-              size={focused ? 26 : 24}
-              strokeWidth={focused ? 2.5 : 2}
-            />
+            <User color={color} size={focused ? 26 : 24} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />

@@ -11,7 +11,7 @@ export default function ScreenWrapper({ children, className = '', ...props }: Sc
   const { isDark } = useTheme();
 
   return (
-    <View className={`flex-1 ${isDark ? 'dark' : ''} ${className}`} {...props}>
+    <View className={`will-change-variable flex-1 ${isDark ? 'dark' : ''} ${className}`} {...props}>
       {children}
     </View>
   );

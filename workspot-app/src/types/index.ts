@@ -3,6 +3,8 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Spot {
@@ -19,10 +21,15 @@ export interface Spot {
   noiseLevel: 'QUIET' | 'MODERATE' | 'LOUD';
   priceRange: 'FREE' | 'CHEAP' | 'MODERATE' | 'EXPENSIVE';
   type: 'CAFE' | 'LIBRARY' | 'COWORKING' | 'PARK' | 'OTHER';
+  openingHours?: string;
   coverImage?: string;
   images?: string[];
+  playlistUrl?: string;
   averageRating?: number;
   reviewCount: number;
+  verified: boolean;
+  createdById: string;
+  createdBy?: User;
   createdAt: string;
   updatedAt: string;
 }
