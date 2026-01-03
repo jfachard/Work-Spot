@@ -1,6 +1,7 @@
 export const CLOUDINARY_CONFIG = {
   cloudName: process.env.EXPO_PUBLIC_CLOUDNAME,
-  uploadPreset: process.env.EXPO_PUBLIC_UPLOADPRESET,
+  uploadPreset: {
+    avatar: process.env.EXPO_PUBLIC_AVATAR,
+    spots: process.env.EXPO_PUBLIC_SPOTS,
+  },
 };
-
-console.log(CLOUDINARY_CONFIG);

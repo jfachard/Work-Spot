@@ -1,5 +1,6 @@
 import api from './api';
 import { Spot } from '../types';
+import { cloudinaryService } from './cloudinaryService';
 
 interface GetSpotsParams {
   latitude?: number;
@@ -40,8 +41,28 @@ export const spotsService = {
     return response.data;
   },
 
-  async createSpot(data: CreateSpotData): Promise<Spot> {
-    const response = await api.post('/spots', data);
+  async createSpot(
+    data: CreateSpotData,
+    coverImageUri?: string,
+    additionalImagesUris?: string[]
+  ): Promise<Spot> {
+    let coverImageUrl: string | undefined;
+    let imagesUrls: string[] | undefined;
+
+    if (coverImageUri) {
+      coverImageUrl = await cloudinaryService.uploadImage(coverImageUri, 'spots');
+    }
+
+    if (additionalImagesUris && additionalImagesUris.length > 0) {
+      imagesUrls = await cloudinaryService.uploadMultipleImages(additionalImagesUris, 'spots');
+    }
+
+    const response = await api.post('/spots', {
+      ...data,
+      coverImage: coverImageUrl,
+      images: imagesUrls,
+    });
+
     return response.data;
   },
 

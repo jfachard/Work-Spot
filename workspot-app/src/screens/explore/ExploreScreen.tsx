@@ -60,7 +60,6 @@ export default function ExploreScreen() {
     setRefreshing(false);
   };
 
-  // Filtrer les spots par recherche
   const filteredSpots = spots.filter(
     (spot) =>
       spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -72,10 +71,8 @@ export default function ExploreScreen() {
       className="bg-surface border-border mb-4 overflow-hidden rounded-2xl border"
       activeOpacity={0.7}
       onPress={() => {
-        // Navigation vers le détail (à créer plus tard)
         Alert.alert('Spot', `Détail de ${item.name} (à venir)`);
       }}>
-      {/* Image */}
       <View className="relative">
         {item.coverImage ? (
           <Image
@@ -89,14 +86,12 @@ export default function ExploreScreen() {
           </View>
         )}
 
-        {/* Badge type */}
         <View className="bg-surface/95 absolute top-3 left-3 rounded-full px-3 py-1.5">
           <Text className="text-text text-xs font-semibold capitalize">
             {item.type.toLowerCase()}
           </Text>
         </View>
 
-        {/* Rating */}
         {item.averageRating && item.averageRating > 0 ? (
           <View className="bg-surface/95 absolute top-3 right-3 flex-row items-center rounded-full px-2.5 py-1.5">
             <Star size={14} color="#F59E0B" fill="#F59E0B" />
@@ -107,7 +102,6 @@ export default function ExploreScreen() {
         ) : null}
       </View>
 
-      {/* Contenu */}
       <View className="p-4">
         <Text className="text-text-title mb-1 text-lg font-bold">{item.name}</Text>
 
@@ -118,7 +112,6 @@ export default function ExploreScreen() {
           </Text>
         </View>
 
-        {/* Tags */}
         <View className="flex-row flex-wrap gap-2">
           {item.hasWifi && (
             <View className="bg-surface-soft flex-row items-center rounded-lg px-2.5 py-1">
@@ -168,7 +161,6 @@ export default function ExploreScreen() {
   return (
     <ScreenWrapper>
       <View className="bg-bg flex-1">
-        {/* Header */}
         <View className="bg-bg border-border border-b px-6 pt-12 pb-4">
           <View className="mb-4 flex-row items-center justify-between">
             <View>
@@ -180,7 +172,6 @@ export default function ExploreScreen() {
             </View>
           </View>
 
-          {/* Search Bar */}
           <View className="mb-3 flex-row gap-2">
             <View className="bg-surface border-border flex-1 flex-row items-center rounded-xl border px-4 py-3">
               <Search size={20} color="#94A3B8" />
@@ -201,7 +192,6 @@ export default function ExploreScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Toggle List/Map */}
           <View className="bg-surface-soft flex-row rounded-xl p-1">
             <TouchableOpacity
               className={`flex-1 flex-row items-center justify-center rounded-lg py-2 ${
@@ -239,7 +229,6 @@ export default function ExploreScreen() {
           </View>
         </View>
 
-        {/* Content */}
         {viewMode === 'list' ? (
           <FlatList
             data={filteredSpots}
@@ -257,9 +246,8 @@ export default function ExploreScreen() {
           </View>
         )}
 
-        {/* FAB - Create Spot */}
         <TouchableOpacity
-          className="bg-primary absolute right-6 bottom-6 h-14 w-14 items-center justify-center rounded-full shadow-lg"
+          className="bg-primary absolute right-6 bottom-24 h-14 w-14 items-center justify-center rounded-full shadow-lg"
           activeOpacity={0.7}
           onPress={() => Alert.alert('Créer un spot', 'À venir')}>
           <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />

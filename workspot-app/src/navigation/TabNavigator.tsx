@@ -29,7 +29,7 @@ export default function TabNavigator() {
           position: 'absolute',
           borderTopWidth: 0,
           elevation: 0,
-          height: 88,
+          height: 77,
           paddingBottom: 24,
           paddingTop: 12,
           backgroundColor: 'transparent',

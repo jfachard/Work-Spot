@@ -1,6 +1,6 @@
 import api from './api';
 import { User } from '../types';
-import { CLOUDINARY_CONFIG } from '../config/cloudinary';
+import { cloudinaryService } from './cloudinaryService';
 
 export const userService = {
   async getProfile(): Promise<User> {
@@ -17,52 +17,13 @@ export const userService = {
     return response.data;
   },
 
-  async uploadImage(imageUri: string): Promise<string> {
-    const formData = new FormData();
-
-    const uriParts = imageUri.split('.');
-    const fileType = uriParts[uriParts.length - 1];
-
-    formData.append('file', {
-      uri: imageUri,
-      type: `image/${fileType}`,
-      name: `upload.${fileType}`,
-    } as any);
-
-    formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-    formData.append('folder', 'workspot/avatars');
-
-    try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-          headers: {
-            Accept: 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      return data.secure_url;
-    } catch (error) {
-      console.error('Cloudinary upload error:', error);
-      throw new Error('Failed to upload image');
-    }
-  },
-
   async updateProfile(data: { name?: string; email?: string; avatar?: string }): Promise<User> {
     const response = await api.patch('/users/me', data);
     return response.data;
   },
-  async uploadAvatar(imageUri: string): Promise<User> {
-    const avatarUrl = await this.uploadImage(imageUri);
 
+  async uploadAvatar(imageUri: string): Promise<User> {
+    const avatarUrl = await cloudinaryService.uploadImage(imageUri, 'avatars');
     return this.updateProfile({ avatar: avatarUrl });
   },
 
