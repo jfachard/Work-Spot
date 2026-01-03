@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -119,5 +124,20 @@ export class UserService {
       reviewsWritten: reviewsCount,
       favoriteSpots: favoritesCount,
     };
+  }
+
+  async getMySpots(userId: string) {
+    return this.prisma.spot.findMany({
+      where: { createdById: userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: {
+            reviews: true,
+            favorites: true,
+          },
+        },
+      },
+    });
   }
 }

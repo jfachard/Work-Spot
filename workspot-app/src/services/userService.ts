@@ -1,5 +1,5 @@
 import api from './api';
-import { User } from '../types';
+import { User, Spot } from '../types';
 import { cloudinaryService } from './cloudinaryService';
 
 export const userService = {
@@ -14,6 +14,11 @@ export const userService = {
     favoriteSpots: number;
   }> {
     const response = await api.get('/users/me/stats');
+    return response.data;
+  },
+
+  async getMySpots(): Promise<Spot[]> {
+    const response = await api.get('/users/me/spots');
     return response.data;
   },
 

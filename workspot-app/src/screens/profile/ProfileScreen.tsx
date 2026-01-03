@@ -152,6 +152,16 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         },
       ],
     },
+    {
+      section: 'Spots',
+      items: [
+        {
+          icon: MapPin,
+          label: 'Mes spots',
+          onPress: () => navigation.navigate('MySpots'),
+        },
+      ],
+    },
   ];
 
   return (

@@ -33,6 +33,14 @@ export class UserController {
     return this.userService.getUserStats(req.user.sub);
   }
 
+  @Get('me/spots')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my created spots' })
+  async getMySpots(@Request() req) {
+    return this.userService.getMySpots(req.user.sub);
+  }
+
   @Patch('me')
   @ApiOperation({ summary: 'Update my profile' })
   update(@Body() updateUserDto: UpdateUserDto, @Request() req) {
