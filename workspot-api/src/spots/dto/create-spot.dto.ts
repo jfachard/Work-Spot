@@ -1,17 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, IsBoolean, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsBoolean,
+  IsEnum,
+  IsOptional,
+  IsArray,
+  IsUrl,
+} from 'class-validator';
 
 export enum NoiseLevel {
   QUIET = 'QUIET',
   MODERATE = 'MODERATE',
-  LOUD = 'LOUD'
+  LOUD = 'LOUD',
 }
 
 export enum PriceRange {
   FREE = 'FREE',
   CHEAP = 'CHEAP',
   MODERATE = 'MODERATE',
-  EXPENSIVE = 'EXPENSIVE'
+  EXPENSIVE = 'EXPENSIVE',
 }
 
 export enum SpotType {
@@ -19,11 +28,11 @@ export enum SpotType {
   LIBRARY = 'LIBRARY',
   COWORKING = 'COWORKING',
   PARK = 'PARK',
-  OTHER = 'OTHER'
+  OTHER = 'OTHER',
 }
 
 export class CreateSpotDto {
-  @ApiProperty({ example: 'Le Café des Arts' })
+  @ApiProperty({ example: 'Le Coffee Lab' })
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -43,43 +52,66 @@ export class CreateSpotDto {
   @IsNotEmpty()
   city: string;
 
-  @ApiProperty({ example: 'France', default: 'France' })
+  @ApiProperty({ example: 'France' })
   @IsString()
-  @IsOptional()
-  country?: string;
+  @IsNotEmpty()
+  country: string;
 
   @ApiProperty({ example: 48.8566 })
   @IsNumber()
-  @IsNotEmpty()
   latitude: number;
 
   @ApiProperty({ example: 2.3522 })
   @IsNumber()
-  @IsNotEmpty()
   longitude: number;
 
   @ApiProperty({ example: true })
   @IsBoolean()
-  @IsOptional()
-  hasWifi?: boolean;
+  hasWifi: boolean;
 
   @ApiProperty({ example: true })
   @IsBoolean()
-  @IsOptional()
-  hasPower?: boolean;
+  hasPower: boolean;
 
   @ApiProperty({ enum: NoiseLevel, example: NoiseLevel.MODERATE })
   @IsEnum(NoiseLevel)
-  @IsOptional()
-  noiseLevel?: NoiseLevel;
+  noiseLevel: NoiseLevel;
 
   @ApiProperty({ enum: PriceRange, example: PriceRange.MODERATE })
   @IsEnum(PriceRange)
-  @IsOptional()
-  priceRange?: PriceRange;
+  priceRange: PriceRange;
 
   @ApiProperty({ enum: SpotType, example: SpotType.CAFE })
   @IsEnum(SpotType)
+  type: SpotType;
+
+  @ApiProperty({ example: '8:00 - 20:00', required: false })
+  @IsString()
   @IsOptional()
-  type?: SpotType;
+  openingHours?: string;
+
+  @ApiProperty({
+    example: 'https://res.cloudinary.com/...',
+    required: false,
+    description: 'URL de la photo de couverture',
+  })
+  @IsUrl()
+  @IsOptional()
+  coverImage?: string;
+
+  @ApiProperty({
+    example: ['https://res.cloudinary.com/...'],
+    required: false,
+    type: [String],
+    description: 'URLs des photos additionnelles',
+  })
+  @IsArray()
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  images?: string[];
+
+  @ApiProperty({ example: 'https://open.spotify.com/...', required: false })
+  @IsUrl()
+  @IsOptional()
+  playlistUrl?: string;
 }

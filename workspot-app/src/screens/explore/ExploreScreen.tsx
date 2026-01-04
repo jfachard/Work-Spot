@@ -23,19 +23,25 @@ import {
   Heart,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { spotsService } from '../../services/spotsService';
 import { Spot } from '../../types';
 
+import type { ExploreStackParamList } from '../../navigation/ExploreNavigator';
+
+type NavigationProps = NativeStackNavigationProp<ExploreStackParamList>;
+
 type ViewMode = 'list' | 'map';
 
 export default function ExploreScreen() {
-  const navigation = useNavigation();
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  const navigation = useNavigation<NavigationProps>();
 
   useEffect(() => {
     loadSpots();
@@ -249,7 +255,8 @@ export default function ExploreScreen() {
         <TouchableOpacity
           className="bg-primary absolute right-6 bottom-24 h-14 w-14 items-center justify-center rounded-full shadow-lg"
           activeOpacity={0.7}
-          onPress={() => Alert.alert('Créer un spot', 'À venir')}>
+          onPress={() => navigation.navigate('CreateSpot')} // ← Change ici
+        >
           <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>

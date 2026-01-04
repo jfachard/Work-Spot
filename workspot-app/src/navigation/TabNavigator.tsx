@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import { Platform, StyleSheet } from 'react-native';
 import { Map, Heart, User } from 'lucide-react-native';
-import ExploreScreen from '../screens/explore/ExploreScreen';
+import ExploreNavigator from './ExploreNavigator';
 import FavoritesScreen from '../screens/favorites/FavoritesScreen';
 import ProfileNavigator from './ProfileNavigator';
 import { useTheme } from '../contexts/ThemeContext';
@@ -62,7 +62,7 @@ export default function TabNavigator() {
       }}>
       <Tab.Screen
         name="Explore"
-        component={ExploreScreen}
+        component={ExploreNavigator}
         options={{
           tabBarLabel: 'Explorer',
           tabBarIcon: ({ color, size, focused }) => (

@@ -53,7 +53,7 @@ export class SpotsService {
 
     // Si géolocalisation, filtrer par distance
     if (filters?.latitude && filters?.longitude && filters?.radius) {
-      return spots.filter(spot => {
+      return spots.filter((spot) => {
         const distance = this.calculateDistance(
           filters.latitude!,
           filters.longitude!,
@@ -99,7 +99,6 @@ export class SpotsService {
   }
 
   async update(id: string, updateSpotDto: UpdateSpotDto, userId: string) {
-    // Vérifier que le spot existe et appartient à l'user
     const spot = await this.prisma.spot.findUnique({
       where: { id },
     });
@@ -138,7 +137,6 @@ export class SpotsService {
     return { message: 'Spot deleted successfully' };
   }
 
-  // Calcul de distance entre deux points (formule Haversine)
   private calculateDistance(
     lat1: number,
     lon1: number,
