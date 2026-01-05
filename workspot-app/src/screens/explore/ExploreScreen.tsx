@@ -76,9 +76,7 @@ export default function ExploreScreen() {
     <TouchableOpacity
       className="bg-surface border-border mb-4 overflow-hidden rounded-2xl border"
       activeOpacity={0.7}
-      onPress={() => {
-        Alert.alert('Spot', `Détail de ${item.name} (à venir)`);
-      }}>
+      onPress={() => navigation.navigate('SpotDetail', { spotId: item.id })}>
       <View className="relative">
         {item.coverImage ? (
           <Image
