@@ -34,6 +34,14 @@ export interface Spot {
   updatedAt: string;
 }
 
+export interface Favorite {
+  id: string;
+  userId: string;
+  spotId: string;
+  spot: Spot;
+  createdAt: string;
+}
+
 export interface Review {
   id: string;
   rating: number;
@@ -41,6 +49,18 @@ export interface Review {
   images?: string[];
   user: User;
   createdAt: string;
+}
+
+export interface CreateReviewData {
+  rating: number;
+  comment?: string;
+  images?: string[];
+}
+
+export interface UpdateReviewData {
+  rating?: number;
+  comment?: string;
+  images?: string[];
 }
 
 export interface LoginCredentials {

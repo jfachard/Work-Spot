@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { userService } from '../../services/userService';
+import { useTabBarHeight } from '../../hooks/useTabBarHeight';
 import ScreenWrapper from '../../components/ScreenWrapper';
 
 interface ProfileScreenProps {
@@ -43,6 +44,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   });
   const [loadingStats, setLoadingStats] = useState(true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const tabBarHeight = useTabBarHeight();
 
   useEffect(() => {
     loadStats();
@@ -166,7 +169,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   return (
     <ScreenWrapper>
-      <ScrollView className="bg-bg flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="bg-bg flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: tabBarHeight }}>
         <View className="bg-primary/5 border-border border-b px-6 pt-16 pb-8">
           <View className="items-center">
             <View className="relative mb-4">

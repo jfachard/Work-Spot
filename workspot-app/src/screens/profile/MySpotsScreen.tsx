@@ -1,5 +1,6 @@
 import {
   View,
+  ScrollView,
   Text,
   TouchableOpacity,
   FlatList,
@@ -11,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
 import { Spot } from '../../types';
 import { userService } from '../../services/userService';
+import { useTabBarHeight } from '@/src/hooks/useTabBarHeight';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { ArrowLeft, MapPin, Wifi, Zap, Star } from 'lucide-react-native';
 
@@ -23,6 +25,7 @@ export default function MySpotsScreen({ navigation }: MySpotsScreenProps) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tabBarHeight = useTabBarHeight();
 
   useEffect(() => {
     loadMySpots();

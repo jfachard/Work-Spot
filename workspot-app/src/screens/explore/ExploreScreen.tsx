@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -22,47 +22,78 @@ import {
   Map as MapIcon,
   Heart,
 } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { spotsService } from '../../services/spotsService';
+import { favoritesService } from '../../services/favoritesService';
 import { Spot } from '../../types';
-
 import type { ExploreStackParamList } from '../../navigation/ExploreNavigator';
 
 type NavigationProps = NativeStackNavigationProp<ExploreStackParamList>;
 
 type ViewMode = 'list' | 'map';
 
+// Type étendu pour inclure isFavorite
+type SpotWithFavorite = Spot & { isFavorite: boolean };
+
 export default function ExploreScreen() {
-  const [spots, setSpots] = useState<Spot[]>([]);
+  const [spots, setSpots] = useState<SpotWithFavorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [favoriteSpotIds, setFavoriteSpotIds] = useState<Set<string>>(new Set());
 
   const navigation = useNavigation<NavigationProps>();
+  useFocusEffect(
+    React.useCallback(() => {
+      loadData();
+    }, [])
+  );
 
-  useEffect(() => {
-    loadSpots();
-  }, []);
-
-  const loadSpots = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await spotsService.getSpots();
-      setSpots(data);
+      await Promise.all([loadSpots(), loadFavorites()]);
     } catch (error) {
-      console.error('Error loading spots:', error);
-      Alert.alert('Erreur', 'Impossible de charger les spots');
+      console.error('Error loading data:', error);
+      Alert.alert('Erreur', 'Impossible de charger les données');
     } finally {
       setLoading(false);
     }
   };
 
+  const loadSpots = async () => {
+    try {
+      const data = await spotsService.getSpots();
+      setSpots(data.map((spot) => ({ ...spot, isFavorite: false })));
+    } catch (error) {
+      console.error('Error loading spots:', error);
+      throw error;
+    }
+  };
+
+  const loadFavorites = async () => {
+    try {
+      const favorites = await favoritesService.getFavorites();
+      const favoriteIds = new Set(favorites.map((fav) => fav.spotId));
+      setFavoriteSpotIds(favoriteIds);
+
+      setSpots((prevSpots) =>
+        prevSpots.map((spot) => ({
+          ...spot,
+          isFavorite: favoriteIds.has(spot.id),
+        }))
+      );
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadSpots();
+    await loadData();
     setRefreshing(false);
   };
 
@@ -72,7 +103,7 @@ export default function ExploreScreen() {
       spot.city.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const renderSpotCard = ({ item }: { item: Spot }) => (
+  const renderSpotCard = ({ item }: { item: SpotWithFavorite }) => (
     <TouchableOpacity
       className="bg-surface border-border mb-4 overflow-hidden rounded-2xl border"
       activeOpacity={0.7}
@@ -96,14 +127,22 @@ export default function ExploreScreen() {
           </Text>
         </View>
 
-        {item.averageRating && item.averageRating > 0 ? (
-          <View className="bg-surface/95 absolute top-3 right-3 flex-row items-center rounded-full px-2.5 py-1.5">
-            <Star size={14} color="#F59E0B" fill="#F59E0B" />
-            <Text className="text-text ml-1 text-xs font-bold">
-              {item.averageRating.toFixed(1)}
-            </Text>
-          </View>
-        ) : null}
+        <View className="absolute top-3 right-3 flex-row gap-2">
+          {item.averageRating && item.averageRating > 0 ? (
+            <View className="bg-surface flex-row items-center rounded-full px-2.5 py-1.5">
+              <Star size={14} color="#F59E0B" fill="#F59E0B" />
+              <Text className="text-text ml-1 text-xs font-bold">
+                {item.averageRating.toFixed(1)}
+              </Text>
+            </View>
+          ) : null}
+
+          {item.isFavorite && (
+            <View className="bg-surface h-8 w-8 items-center justify-center rounded-full">
+              <Heart size={16} color="#EF4444" fill="#EF4444" strokeWidth={2.5} />
+            </View>
+          )}
+        </View>
       </View>
 
       <View className="p-4">
@@ -238,7 +277,7 @@ export default function ExploreScreen() {
             data={filteredSpots}
             renderItem={renderSpotCard}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 24 }}
+            contentContainerStyle={{ padding: 24, paddingBottom: 120 }}
             showsVerticalScrollIndicator={false}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             ListEmptyComponent={renderEmptyState}
@@ -253,8 +292,7 @@ export default function ExploreScreen() {
         <TouchableOpacity
           className="bg-primary absolute right-6 bottom-24 h-14 w-14 items-center justify-center rounded-full shadow-lg"
           activeOpacity={0.7}
-          onPress={() => navigation.navigate('CreateSpot')} // ← Change ici
-        >
+          onPress={() => navigation.navigate('CreateSpot')}>
           <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>

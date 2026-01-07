@@ -10,7 +10,7 @@ import {
   Share,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
 import {
   ArrowLeft,
   Heart,
@@ -23,37 +23,48 @@ import {
   Volume2,
   Star,
   MessageSquare,
-  Navigation,
   Edit,
   Trash2,
+  User,
 } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { spotsService } from '../../services/spotsService';
+import { favoritesService } from '../../services/favoritesService';
 import { Spot } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import type { ExploreStackParamList } from '../../navigation/ExploreNavigator';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useTabBarHeight } from '@/src/hooks/useTabBarHeight';
 
 type SpotDetailRouteProp = RouteProp<ExploreStackParamList, 'SpotDetail'>;
+
+type NavigationProp = NativeStackNavigationProp<ExploreStackParamList>;
 
 const { width } = Dimensions.get('window');
 
 export default function SpotDetailScreen() {
   const route = useRoute<SpotDetailRouteProp>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
   const { user } = useAuth();
   const { spotId } = route.params;
 
   const [spot, setSpot] = useState<Spot | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
 
   const { isDark } = useTheme();
   const iconColor = isDark ? '#F8FAFC' : '#0F172A';
+  const tabBarHeight = useTabBarHeight();
 
-  useEffect(() => {
-    loadSpot();
-  }, [spotId]);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadSpot();
+      checkFavorite();
+    }, [spotId])
+  );
 
   const loadSpot = async () => {
     try {
@@ -66,6 +77,48 @@ export default function SpotDetailScreen() {
       navigation.goBack();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkFavorite = async () => {
+    try {
+      const favorites = await favoritesService.getFavorites();
+      const favorite = favorites.find((fav) => fav.spotId === spotId);
+
+      if (favorite) {
+        setIsFavorite(true);
+        setFavoriteId(favorite.id);
+      } else {
+        setIsFavorite(false);
+        setFavoriteId(null);
+      }
+    } catch (error) {
+      console.error('Error checking favorite:', error);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (loadingFavorite) {
+      return;
+    }
+    try {
+      if (isFavorite && favoriteId) {
+        await favoritesService.removeFavorite(favoriteId);
+        setIsFavorite(false);
+        setFavoriteId(null);
+        Alert.alert('✅', `${spot?.name} retiré des favoris`);
+      } else {
+        const newFavorite = await favoritesService.addFavorite(spotId);
+        setIsFavorite(true);
+        setFavoriteId(newFavorite.id);
+      }
+    } catch (error: any) {
+      console.error('Error toggling favorite:', error);
+      Alert.alert('Erreur', error.response?.data?.message || 'Impossible de modifier les favoris');
+    } finally {
+      setLoadingFavorite(false);
     }
   };
 
@@ -95,11 +148,6 @@ export default function SpotDetailScreen() {
     }
   };
 
-  const handleToggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    Alert.alert(isFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris', spot?.name);
-  };
-
   const handleDelete = () => {
     Alert.alert('Supprimer le spot', 'Êtes-vous sûr de vouloir supprimer ce spot ?', [
       { text: 'Annuler', style: 'cancel' },
@@ -120,7 +168,11 @@ export default function SpotDetailScreen() {
   };
 
   const handleAddReview = () => {
-    Alert.alert('Ajouter un avis', 'À venir');
+    if (!spot) return;
+    navigation.navigate('AddReview', {
+      spotId: spot.id,
+      spotName: spot.name,
+    });
   };
 
   const isOwner = user?.id === spot?.createdById;
@@ -142,7 +194,9 @@ export default function SpotDetailScreen() {
   return (
     <ScreenWrapper>
       <View className="bg-bg flex-1">
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: tabBarHeight }}>
           <View className="relative">
             {spot.coverImage ? (
               <Image
@@ -174,12 +228,18 @@ export default function SpotDetailScreen() {
 
                 <TouchableOpacity
                   onPress={handleToggleFavorite}
+                  disabled={loadingFavorite}
                   className="bg-surface/95 h-10 w-10 items-center justify-center rounded-full">
-                  <Heart
-                    size={18}
-                    color={isFavorite ? '#EF4444' : iconColor}
-                    fill={isFavorite ? '#EF4444' : 'none'}
-                  />
+                  {loadingFavorite ? (
+                    <ActivityIndicator size="small" color="#EF4444" />
+                  ) : (
+                    <Heart
+                      size={18}
+                      color={isFavorite ? '#EF4444' : iconColor}
+                      fill={isFavorite ? '#EF4444' : 'none'}
+                      strokeWidth={2.5}
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -322,7 +382,10 @@ export default function SpotDetailScreen() {
                     key={review.id}
                     className="border-border bg-surface mb-3 rounded-xl border p-4">
                     <View className="mb-2 flex-row items-center justify-between">
-                      <Text className="text-text font-semibold">{review.user.name}</Text>
+                      <View className="flex-row items-center">
+                        <User size={16} color="#94A3B8" />
+                        <Text className="text-text ml-2 font-semibold">{review.user.name}</Text>
+                      </View>
                       <View className="flex-row items-center">
                         <Star size={14} color="#F59E0B" fill="#F59E0B" />
                         <Text className="text-text ml-1 text-sm font-bold">{review.rating}</Text>
