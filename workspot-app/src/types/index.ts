@@ -30,6 +30,7 @@ export interface Spot {
   verified: boolean;
   createdById: string;
   createdBy?: User;
+  reviews?: Review[];
   createdAt: string;
   updatedAt: string;
 }

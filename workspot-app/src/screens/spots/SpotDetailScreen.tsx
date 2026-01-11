@@ -350,7 +350,7 @@ export default function SpotDetailScreen() {
             {isOwner && (
               <View className="mb-6 flex-row gap-3">
                 <TouchableOpacity
-                  onPress={() => Alert.alert('Modifier', 'À venir')}
+                  onPress={() => navigation.navigate('UpdateSpot', { spotId: spot.id })}
                   className="border-primary bg-primary/10 flex-1 flex-row items-center justify-center rounded-xl border py-3">
                   <Edit size={18} color="#2563EB" />
                   <Text className="text-primary ml-2 font-semibold">Modifier</Text>

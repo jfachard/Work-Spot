@@ -3,12 +3,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import CreateSpotScreen from '../screens/spots/CreateSpotScreen';
+import UpdateSpotScreen from '../screens/spots/UpdateSpotScreen';
 import SpotDetailScreen from '../screens/spots/SpotDetailScreen';
 import AddReviewScreen from '../screens/reviews/AddReviewScreen';
 
 export type ExploreStackParamList = {
   ExploreMain: undefined;
   CreateSpot: undefined;
+  UpdateSpot: { spotId: string };
   SpotDetail: { spotId: string };
   AddReview: { spotId: string; spotName: string };
 };
@@ -25,6 +27,14 @@ export default function ExploreNavigator() {
       <Stack.Screen
         name="CreateSpot"
         component={CreateSpotScreen}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="UpdateSpot"
+        component={UpdateSpotScreen}
         options={{
           headerShown: false,
           presentation: 'modal',

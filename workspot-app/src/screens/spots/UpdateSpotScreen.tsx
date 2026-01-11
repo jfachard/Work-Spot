@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,22 +13,30 @@ import {
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Camera, MapPin, Wifi, WifiOff, Zap, ZapOff, X, Locate, Clock } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { spotsService } from '../../services/spotsService';
 import { useTheme } from '../../contexts/ThemeContext';
+import type { ExploreStackParamList } from '../../navigation/ExploreNavigator';
 
 type NoiseLevel = 'QUIET' | 'MODERATE' | 'LOUD';
 type PriceRange = 'FREE' | 'CHEAP' | 'MODERATE' | 'EXPENSIVE';
 type SpotType = 'CAFE' | 'LIBRARY' | 'COWORKING' | 'PARK' | 'OTHER';
 
-export default function CreateSpotScreen() {
+type UpdateSpotRouteProp = RouteProp<ExploreStackParamList, 'UpdateSpot'>;
+
+export default function UpdateSpotScreen() {
   const navigation = useNavigation();
-    const { isDark } = useTheme();
+  const route = useRoute<UpdateSpotRouteProp>();
+  const { spotId } = route.params;
+  const { isDark } = useTheme();
+
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [coverImageChanged, setCoverImageChanged] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -52,6 +60,61 @@ export default function CreateSpotScreen() {
   const [openingDate, setOpeningDate] = useState(new Date());
   const [closingDate, setClosingDate] = useState(new Date());
 
+  useEffect(() => {
+    loadSpot();
+  }, [spotId]);
+
+  const loadSpot = async () => {
+    try {
+      setInitialLoading(true);
+      const spot = await spotsService.getSpotById(spotId);
+
+      setFormData({
+        name: spot.name,
+        description: spot.description || '',
+        address: spot.address,
+        city: spot.city,
+        country: spot.country,
+        latitude: spot.latitude.toString(),
+        longitude: spot.longitude.toString(),
+        hasWifi: spot.hasWifi,
+        hasPower: spot.hasPower,
+        noiseLevel: spot.noiseLevel,
+        priceRange: spot.priceRange,
+        type: spot.type,
+        openingTime: spot.openingHours ? spot.openingHours.split(' - ')[0] : '',
+        closingTime: spot.openingHours ? spot.openingHours.split(' - ')[1] : '',
+      });
+
+      if (spot.coverImage) {
+        setCoverImage(spot.coverImage);
+      }
+
+      // Initialize time pickers if times exist
+      if (spot.openingHours) {
+        const [opening, closing] = spot.openingHours.split(' - ');
+        if (opening) {
+          const [hours, minutes] = opening.split(':');
+          const date = new Date();
+          date.setHours(parseInt(hours), parseInt(minutes));
+          setOpeningDate(date);
+        }
+        if (closing) {
+          const [hours, minutes] = closing.split(':');
+          const date = new Date();
+          date.setHours(parseInt(hours), parseInt(minutes));
+          setClosingDate(date);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading spot:', error);
+      Alert.alert('Erreur', 'Impossible de charger le spot');
+      navigation.goBack();
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -69,6 +132,7 @@ export default function CreateSpotScreen() {
 
     if (!result.canceled && result.assets[0]) {
       setCoverImage(result.assets[0].uri);
+      setCoverImageChanged(true);
     }
   };
 
@@ -121,7 +185,7 @@ export default function CreateSpotScreen() {
     }
   };
 
-  const handleCreate = async () => {
+  const handleUpdate = async () => {
     if (!formData.name || !formData.address || !formData.city) {
       Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
       return;
@@ -134,7 +198,13 @@ export default function CreateSpotScreen() {
 
     setLoading(true);
     try {
-      await spotsService.createSpot(
+      const openingHours =
+        formData.openingTime && formData.closingTime
+          ? `${formData.openingTime} - ${formData.closingTime}`
+          : undefined;
+
+      await spotsService.updateSpot(
+        spotId,
         {
           name: formData.name,
           description: formData.description || undefined,
@@ -148,23 +218,34 @@ export default function CreateSpotScreen() {
           noiseLevel: formData.noiseLevel,
           priceRange: formData.priceRange,
           type: formData.type,
+          openingHours,
         },
-        coverImage || undefined
+        coverImageChanged ? coverImage || undefined : undefined
       );
 
-      Alert.alert('Succès', 'Spot créé avec succès !', [
+      Alert.alert('Succès', 'Spot mis à jour avec succès !', [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error: any) {
-      console.error('Create spot error:', error);
-      Alert.alert('Erreur', 'Impossible de créer le spot');
+      console.error('Update spot error:', error);
+      Alert.alert('Erreur', error.response?.data?.message || 'Impossible de mettre à jour le spot');
     } finally {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <ScreenWrapper>
+        <View className="bg-bg flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#2563EB" />
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper>
@@ -174,9 +255,9 @@ export default function CreateSpotScreen() {
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View className="flex-row items-center justify-between px-6 pt-12 pb-6">
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <X size={24} color="#0F172A" />
+              <X size={24} color={isDark ? '#F8FAFC' : '#0F172A'} />
             </TouchableOpacity>
-            <Text className="text-text-title text-xl font-bold">Ajouter un spot</Text>
+            <Text className="text-text-title text-xl font-bold">Modifier le spot</Text>
             <View style={{ width: 24 }} />
           </View>
 
@@ -349,7 +430,7 @@ export default function CreateSpotScreen() {
               <Text className="text-text mb-2 text-sm font-medium">
                 Horaires (optionnel)
               </Text>
-              
+
               {/* iOS: Layout vertical pour mieux afficher les pickers */}
               {Platform.OS === 'ios' ? (
                 <View className="gap-3">
@@ -532,13 +613,13 @@ export default function CreateSpotScreen() {
             </View>
 
             <TouchableOpacity
-              onPress={handleCreate}
+              onPress={handleUpdate}
               disabled={loading}
               className="bg-primary mb-8 items-center justify-center rounded-xl py-4">
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-base font-bold text-white">Créer le spot</Text>
+                <Text className="text-base font-bold text-white">Mettre à jour le spot</Text>
               )}
             </TouchableOpacity>
           </View>

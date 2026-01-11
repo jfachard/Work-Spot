@@ -66,8 +66,22 @@ export const spotsService = {
     return response.data;
   },
 
-  async updateSpot(id: string, data: Partial<CreateSpotData>): Promise<Spot> {
-    const response = await api.patch(`/spots/${id}`, data);
+  async updateSpot(
+    id: string,
+    data: Partial<CreateSpotData>,
+    coverImageUri?: string
+  ): Promise<Spot> {
+    let coverImageUrl: string | undefined;
+
+    if (coverImageUri) {
+      coverImageUrl = await cloudinaryService.uploadImage(coverImageUri, 'spots');
+    }
+
+    const response = await api.patch(`/spots/${id}`, {
+      ...data,
+      ...(coverImageUrl && { coverImage: coverImageUrl }),
+    });
+
     return response.data;
   },
 
