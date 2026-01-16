@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { Image } from 'expo-image';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'; // ← Ajoute ça
-import * as Location from 'expo-location'; // ← Ajoute ça
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 import {
   Search,
   SlidersHorizontal,
@@ -27,11 +28,20 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ScreenWrapper from '../../components/ScreenWrapper';
+import FilterBottomSheet, { Filters } from '../../components/FilterBottomSheet';
 import { spotsService } from '../../services/spotsService';
 import { favoritesService } from '../../services/favoritesService';
 import { Spot } from '../../types';
-import { useTheme } from '../../contexts/ThemeContext'; // ← Ajoute ça
+import { useTheme } from '../../contexts/ThemeContext';
 import type { ExploreStackParamList } from '../../navigation/ExploreNavigator';
+
+const defaultFilters: Filters = {
+  hasWifi: null,
+  hasPower: null,
+  noiseLevel: null,
+  priceRange: null,
+  type: null,
+};
 
 type NavigationProps = NativeStackNavigationProp<ExploreStackParamList>;
 
@@ -137,13 +147,25 @@ export default function ExploreScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [favoriteSpotIds, setFavoriteSpotIds] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null); // ← Ajoute ça
+  } | null>(null);
 
   const navigation = useNavigation<NavigationProps>();
-  const { isDark } = useTheme(); // ← Ajoute ça
+  const { isDark } = useTheme();
+  const filterSheetRef = useRef<BottomSheet>(null);
+
+  const openFilterSheet = useCallback(() => {
+    filterSheetRef.current?.expand();
+  }, []);
+
+  const resetFilters = useCallback(() => {
+    setFilters(defaultFilters);
+  }, []);
+
+  const activeFiltersCount = Object.values(filters).filter((v) => v !== null).length;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -217,11 +239,21 @@ export default function ExploreScreen() {
     setRefreshing(false);
   };
 
-  const filteredSpots = spots.filter(
-    (spot) =>
+  const filteredSpots = spots.filter((spot) => {
+    // Filtre par recherche
+    const matchesSearch =
       spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      spot.city.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      spot.city.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Filtres avancés
+    const matchesWifi = filters.hasWifi === null || spot.hasWifi === filters.hasWifi;
+    const matchesPower = filters.hasPower === null || spot.hasPower === filters.hasPower;
+    const matchesNoise = filters.noiseLevel === null || spot.noiseLevel === filters.noiseLevel;
+    const matchesPrice = filters.priceRange === null || spot.priceRange === filters.priceRange;
+    const matchesType = filters.type === null || spot.type === filters.type;
+
+    return matchesSearch && matchesWifi && matchesPower && matchesNoise && matchesPrice && matchesType;
+  });
 
   // Calculer la région initiale pour la carte
   const getInitialRegion = () => {
@@ -383,11 +415,20 @@ export default function ExploreScreen() {
             </View>
 
             <TouchableOpacity
-              className="bg-surface border-border w-12 items-center justify-center rounded-xl border"
+              className={`relative w-12 items-center justify-center rounded-xl border ${
+                activeFiltersCount > 0
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border bg-surface'
+              }`}
               activeOpacity={0.7}
-              onPress={() => Alert.alert('Filtres', 'À venir')}
+              onPress={openFilterSheet}
             >
               <SlidersHorizontal size={20} color="#2563EB" />
+              {activeFiltersCount > 0 && (
+                <View className="bg-primary absolute -top-1 -right-1 h-5 w-5 items-center justify-center rounded-full">
+                  <Text className="text-xs font-bold text-white">{activeFiltersCount}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -511,6 +552,13 @@ export default function ExploreScreen() {
           <Plus size={24} color="#FFFFFF" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
+
+      <FilterBottomSheet
+        ref={filterSheetRef}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onReset={resetFilters}
+      />
     </ScreenWrapper>
   );
 }
