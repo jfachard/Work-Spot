@@ -316,7 +316,7 @@ export default function ExploreScreen() {
 
         <View className="absolute top-3 right-3 flex-row gap-2">
           {item.averageRating && item.averageRating > 0 ? (
-            <View className="bg-surface flex-row items-center rounded-full px-2.5 py-1.5">
+            <View className="bg-surface-soft flex-row items-center rounded-full px-2.5 py-1.5">
               <Star size={14} color="#F59E0B" fill="#F59E0B" />
               <Text className="text-text ml-1 text-xs font-bold">
                 {item.averageRating.toFixed(1)}

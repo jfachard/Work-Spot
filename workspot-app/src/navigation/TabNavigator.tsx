@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { Platform, StyleSheet } from 'react-native';
 import { Map, Heart, User } from 'lucide-react-native';
 import ExploreNavigator from './ExploreNavigator';
-import FavoritesScreen from '../screens/favorites/FavoritesScreen';
+import FavoritesNavigator from './FavoritesNavigator';
 import ProfileNavigator from './ProfileNavigator';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -72,7 +72,7 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Favorites"
-        component={FavoritesScreen}
+        component={FavoritesNavigator}
         options={{
           tabBarLabel: 'Favoris',
           tabBarIcon: ({ color, size, focused }) => (
