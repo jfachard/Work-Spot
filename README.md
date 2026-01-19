@@ -140,7 +140,7 @@ npx expo start --clear
 
 **Jean-Francis Achard** - Full-Stack Developer
 
-- 🌐 Portfolio: [jfachard.github.io](https://jfachard.github.io/)
+- 🌐 Portfolio: [jfachard.vercel.app](https://jfachard.vercel.app/)
 - 💼 LinkedIn: [Jean-Francis Achard](https://linkedin.com/in/jfachard)
 - 🐙 GitHub: [@jfachard](https://github.com/jfachard)
 
