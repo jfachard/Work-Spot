@@ -28,7 +28,7 @@ export const userService = {
   },
 
   async uploadAvatar(imageUri: string): Promise<User> {
-    const avatarUrl = await cloudinaryService.uploadImage(imageUri, 'avatars');
+    const avatarUrl = await cloudinaryService.uploadImage(imageUri, 'avatar');
     return this.updateProfile({ avatar: avatarUrl });
   },
 

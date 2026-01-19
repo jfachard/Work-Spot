@@ -1,6 +1,6 @@
 import { CLOUDINARY_CONFIG } from '../config/cloudinary';
 
-type UploadType = 'avatars' | 'spots';
+type UploadType = 'avatar' | 'spots';
 
 export const cloudinaryService = {
   async uploadImage(imageUri: string, type: UploadType): Promise<string> {
