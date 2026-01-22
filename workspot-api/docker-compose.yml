@@ -11,6 +11,31 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workspot -d workspot_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: workspot-api
+    environment:
+      DATABASE_URL: postgresql://workspot:workspot123@postgres:5432/workspot_dev
+      NODE_ENV: production
+      PORT: 3000
+      # Ces variables doivent être définies dans un fichier .env ou passées au runtime
+      JWT_SECRET: ${JWT_SECRET}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
