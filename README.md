@@ -31,6 +31,7 @@ Application mobile moderne pour découvrir des cafés, bibliothèques et espaces
 - **Docker** - Containerisation de la base de données
 - **JWT** - Authentification sécurisée
 - **Socket.io** - Communication temps réel (notifications)
+- **Swagger - Documentation API [swagger](https://work-spot-dr3e.onrender.com/api)
 
 ### APIs & Services
 - **Google Maps Platform** - Places API, Geocoding
