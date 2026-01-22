@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { SpotsModule } from './spots/spots.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { SpotifyModule } from './spotify/spotify.module';
 
 @Module({
   imports: [
@@ -15,12 +16,13 @@ import { FavoritesModule } from './favorites/favorites.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    PrismaModule, 
-    AuthModule, 
-    UserModule, 
-    SpotsModule, 
-    ReviewsModule, 
-    FavoritesModule
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    SpotsModule,
+    ReviewsModule,
+    FavoritesModule,
+    SpotifyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

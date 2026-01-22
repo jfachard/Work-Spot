@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Share,
+  Linking,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
@@ -26,6 +27,7 @@ import {
   Edit,
   Trash2,
   User,
+  SquareArrowOutUpRight ,
 } from 'lucide-react-native';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -339,6 +341,25 @@ export default function SpotDetailScreen() {
                 </View>
               )}
             </View>
+
+            {spot.playlistUrl && (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(spot.playlistUrl!)}
+                className="mb-6 flex-row items-center rounded-2xl border border-[#1DB954]/30 bg-[#1DB954]/10 p-4">
+                <Image
+                  source={require('../../../assets/spotify.png')}
+                  style={{ width: 48, height: 48 }}
+                  contentFit="contain"
+                />
+                <View className="ml-4 flex-1">
+                  <Text className="text-text-title text-base font-bold">Playlist du lieu</Text>
+                  <Text className="text-text-muted text-sm">Ouvrir dans Spotify</Text>
+                </View>
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-[#1DB954]">
+                  <SquareArrowOutUpRight size={16} color="#FFFFFF" />
+                </View>
+              </TouchableOpacity>
+            )}
 
             {spot.description && (
               <View className="mb-6">

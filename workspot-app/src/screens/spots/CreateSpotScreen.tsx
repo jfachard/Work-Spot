@@ -14,11 +14,13 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
-import { Camera, MapPin, Wifi, WifiOff, Zap, ZapOff, X, Locate, Clock } from 'lucide-react-native';
+import { Camera, MapPin, Wifi, WifiOff, Zap, ZapOff, X, Locate, Clock, Music, Search, Trash2 } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { spotsService } from '../../services/spotsService';
 import { useTheme } from '../../contexts/ThemeContext';
+import SpotifyPlaylistPicker from '../../components/SpotifyPlaylistPicker';
+import { SpotifyPlaylist } from '../../services/spotifyService';
 
 type NoiseLevel = 'QUIET' | 'MODERATE' | 'LOUD';
 type PriceRange = 'FREE' | 'CHEAP' | 'MODERATE' | 'EXPENSIVE';
@@ -45,12 +47,15 @@ export default function CreateSpotScreen() {
     type: 'CAFE' as SpotType,
     openingTime: '',
     closingTime: '',
+    playlistUrl: '',
   });
 
   const [showOpeningPicker, setShowOpeningPicker] = useState(false);
   const [showClosingPicker, setShowClosingPicker] = useState(false);
   const [openingDate, setOpeningDate] = useState(new Date());
   const [closingDate, setClosingDate] = useState(new Date());
+  const [showSpotifyPicker, setShowSpotifyPicker] = useState(false);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<SpotifyPlaylist | null>(null);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -148,6 +153,7 @@ export default function CreateSpotScreen() {
           noiseLevel: formData.noiseLevel,
           priceRange: formData.priceRange,
           type: formData.type,
+          playlistUrl: formData.playlistUrl || undefined,
         },
         coverImage || undefined
       );
@@ -518,7 +524,7 @@ export default function CreateSpotScreen() {
               )}
             </View>
 
-            <View className="mb-6">
+            <View className="mb-4">
               <Text className="text-text mb-2 text-sm font-medium">Description (optionnel)</Text>
               <TextInput
                 className="border-border bg-surface text-text rounded-xl border px-4 py-3"
@@ -530,6 +536,62 @@ export default function CreateSpotScreen() {
                 onChangeText={(text) => setFormData({ ...formData, description: text })}
               />
             </View>
+
+            <View className="mb-6">
+              <Text className="text-text mb-2 text-sm font-medium">Playlist Spotify (optionnel)</Text>
+              {selectedPlaylist ? (
+                <View className="border-[#1DB954]/30 bg-[#1DB954]/10 flex-row items-center rounded-xl border p-3">
+                  {selectedPlaylist.imageUrl ? (
+                    <Image
+                      source={{ uri: selectedPlaylist.imageUrl }}
+                      style={{ width: 48, height: 48, borderRadius: 8 }}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View className="h-12 w-12 items-center justify-center rounded-lg bg-[#1DB954]/20">
+                      <Music size={20} color="#1DB954" />
+                    </View>
+                  )}
+                  <View className="ml-3 flex-1">
+                    <Text className="text-text-title text-sm font-semibold" numberOfLines={1}>
+                      {selectedPlaylist.name}
+                    </Text>
+                    <Text className="text-text-muted text-xs" numberOfLines={1}>
+                      {selectedPlaylist.ownerName} • {selectedPlaylist.tracksCount} titres
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedPlaylist(null);
+                      setFormData({ ...formData, playlistUrl: '' });
+                    }}
+                    className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-red-500/10">
+                    <Trash2 size={16} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setShowSpotifyPicker(true)}
+                  className="border-border bg-surface flex-row items-center rounded-xl border px-4 py-3">
+                  <Music size={20} color="#1DB954" />
+                  <Text className="text-text-muted ml-3 flex-1">Rechercher une playlist...</Text>
+                  <Search size={18} color="#94A3B8" />
+                </TouchableOpacity>
+              )}
+              <Text className="text-text-muted mt-1.5 text-xs">
+                Ajoutez une playlist qui correspond à l'ambiance du lieu
+              </Text>
+            </View>
+
+            <SpotifyPlaylistPicker
+              visible={showSpotifyPicker}
+              onClose={() => setShowSpotifyPicker(false)}
+              onSelect={(playlist) => {
+                setSelectedPlaylist(playlist);
+                setFormData({ ...formData, playlistUrl: playlist.url });
+              }}
+              currentUrl={formData.playlistUrl}
+            />
 
             <TouchableOpacity
               onPress={handleCreate}
