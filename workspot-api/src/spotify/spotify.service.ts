@@ -26,9 +26,30 @@ interface SpotifyPlaylist {
   };
 }
 
+interface SpotifyAlbum {
+  id: string;
+  name: string;
+  album_type: string;
+  external_urls: {
+    spotify: string;
+  };
+  images: { url: string; height: number; width: number }[];
+  artists: {
+    name: string;
+  }[];
+  release_date: string;
+  total_tracks: number;
+}
+
 interface SpotifySearchResponse {
-  playlists: {
+  playlists?: {
     items: SpotifyPlaylist[];
+    total: number;
+    limit: number;
+    offset: number;
+  };
+  albums?: {
+    items: SpotifyAlbum[];
     total: number;
     limit: number;
     offset: number;
@@ -42,6 +63,16 @@ export interface PlaylistResult {
   url: string;
   imageUrl: string | null;
   ownerName: string;
+  tracksCount: number;
+}
+
+export interface AlbumResult {
+  id: string;
+  name: string;
+  url: string;
+  imageUrl: string | null;
+  artistName: string;
+  releaseDate: string;
   tracksCount: number;
 }
 
@@ -118,7 +149,7 @@ export class SpotifyService {
         ),
       );
 
-      return response.data.playlists.items
+      return (response.data.playlists?.items || [])
         .filter((playlist) => playlist !== null)
         .map((playlist) => ({
           id: playlist.id,
@@ -165,6 +196,75 @@ export class SpotifyService {
       };
     } catch (error) {
       this.logger.error(`Failed to get playlist info for ${playlistId}`, error);
+      return null;
+    }
+  }
+
+  async searchAlbums(query: string, limit: number = 10): Promise<AlbumResult[]> {
+    const token = await this.getAccessToken();
+
+    try {
+      const response: AxiosResponse<SpotifySearchResponse> = await firstValueFrom(
+        this.httpService.get<SpotifySearchResponse>(
+          'https://api.spotify.com/v1/search',
+          {
+            params: {
+              q: query,
+              type: 'album',
+              limit,
+              market: 'FR',
+            },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        ),
+      );
+
+      return (response.data.albums?.items || [])
+        .filter((album) => album !== null)
+        .map((album) => ({
+          id: album.id,
+          name: album.name,
+          url: album.external_urls.spotify,
+          imageUrl: album.images?.[0]?.url || null,
+          artistName: album.artists.map((a) => a.name).join(', '),
+          releaseDate: album.release_date,
+          tracksCount: album.total_tracks,
+        }));
+    } catch (error) {
+      this.logger.error('Failed to search albums', error);
+      throw new Error('Failed to search Spotify albums');
+    }
+  }
+
+  async getAlbumInfo(albumId: string): Promise<AlbumResult | null> {
+    const token = await this.getAccessToken();
+
+    try {
+      const response: AxiosResponse<SpotifyAlbum> = await firstValueFrom(
+        this.httpService.get<SpotifyAlbum>(
+          `https://api.spotify.com/v1/albums/${albumId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        ),
+      );
+
+      const album = response.data;
+      return {
+        id: album.id,
+        name: album.name,
+        url: album.external_urls.spotify,
+        imageUrl: album.images?.[0]?.url || null,
+        artistName: album.artists.map((a) => a.name).join(', '),
+        releaseDate: album.release_date,
+        tracksCount: album.total_tracks,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get album info for ${albumId}`, error);
       return null;
     }
   }

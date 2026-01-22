@@ -19,8 +19,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import { spotsService } from '../../services/spotsService';
 import { useTheme } from '../../contexts/ThemeContext';
-import SpotifyPlaylistPicker from '../../components/SpotifyPlaylistPicker';
-import { SpotifyPlaylist } from '../../services/spotifyService';
+import SpotifyPlaylistPicker, { SpotifyItem } from '../../components/SpotifyPlaylistPicker';
+import { SpotifyPlaylist, SpotifyAlbum } from '../../services/spotifyService';
 
 type NoiseLevel = 'QUIET' | 'MODERATE' | 'LOUD';
 type PriceRange = 'FREE' | 'CHEAP' | 'MODERATE' | 'EXPENSIVE';
@@ -55,7 +55,8 @@ export default function CreateSpotScreen() {
   const [openingDate, setOpeningDate] = useState(new Date());
   const [closingDate, setClosingDate] = useState(new Date());
   const [showSpotifyPicker, setShowSpotifyPicker] = useState(false);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<SpotifyPlaylist | null>(null);
+  const [selectedSpotifyItem, setSelectedSpotifyItem] = useState<SpotifyItem | null>(null);
+  const [spotifyItemType, setSpotifyItemType] = useState<'playlist' | 'album'>('playlist');
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -538,12 +539,12 @@ export default function CreateSpotScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-text mb-2 text-sm font-medium">Playlist Spotify (optionnel)</Text>
-              {selectedPlaylist ? (
+              <Text className="text-text mb-2 text-sm font-medium">Musique Spotify (optionnel)</Text>
+              {selectedSpotifyItem ? (
                 <View className="border-[#1DB954]/30 bg-[#1DB954]/10 flex-row items-center rounded-xl border p-3">
-                  {selectedPlaylist.imageUrl ? (
+                  {selectedSpotifyItem.imageUrl ? (
                     <Image
-                      source={{ uri: selectedPlaylist.imageUrl }}
+                      source={{ uri: selectedSpotifyItem.imageUrl }}
                       style={{ width: 48, height: 48, borderRadius: 8 }}
                       contentFit="cover"
                     />
@@ -554,15 +555,17 @@ export default function CreateSpotScreen() {
                   )}
                   <View className="ml-3 flex-1">
                     <Text className="text-text-title text-sm font-semibold" numberOfLines={1}>
-                      {selectedPlaylist.name}
+                      {selectedSpotifyItem.name}
                     </Text>
                     <Text className="text-text-muted text-xs" numberOfLines={1}>
-                      {selectedPlaylist.ownerName} • {selectedPlaylist.tracksCount} titres
+                      {spotifyItemType === 'playlist'
+                        ? `${(selectedSpotifyItem as SpotifyPlaylist).ownerName} • ${selectedSpotifyItem.tracksCount} titres`
+                        : `${(selectedSpotifyItem as SpotifyAlbum).artistName} • ${(selectedSpotifyItem as SpotifyAlbum).releaseDate.slice(0, 4)}`}
                     </Text>
                   </View>
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedPlaylist(null);
+                      setSelectedSpotifyItem(null);
                       setFormData({ ...formData, playlistUrl: '' });
                     }}
                     className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-red-500/10">
@@ -574,21 +577,22 @@ export default function CreateSpotScreen() {
                   onPress={() => setShowSpotifyPicker(true)}
                   className="border-border bg-surface flex-row items-center rounded-xl border px-4 py-3">
                   <Music size={20} color="#1DB954" />
-                  <Text className="text-text-muted ml-3 flex-1">Rechercher une playlist...</Text>
+                  <Text className="text-text-muted ml-3 flex-1">Rechercher une playlist ou un album...</Text>
                   <Search size={18} color="#94A3B8" />
                 </TouchableOpacity>
               )}
               <Text className="text-text-muted mt-1.5 text-xs">
-                Ajoutez une playlist qui correspond à l'ambiance du lieu
+                Ajoutez une playlist ou un album qui correspond à l'ambiance du lieu
               </Text>
             </View>
 
             <SpotifyPlaylistPicker
               visible={showSpotifyPicker}
               onClose={() => setShowSpotifyPicker(false)}
-              onSelect={(playlist) => {
-                setSelectedPlaylist(playlist);
-                setFormData({ ...formData, playlistUrl: playlist.url });
+              onSelect={(item, type) => {
+                setSelectedSpotifyItem(item);
+                setSpotifyItemType(type);
+                setFormData({ ...formData, playlistUrl: item.url });
               }}
               currentUrl={formData.playlistUrl}
             />

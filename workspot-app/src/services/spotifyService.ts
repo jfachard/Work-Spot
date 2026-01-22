@@ -10,6 +10,16 @@ export interface SpotifyPlaylist {
   tracksCount: number;
 }
 
+export interface SpotifyAlbum {
+  id: string;
+  name: string;
+  url: string;
+  imageUrl: string | null;
+  artistName: string;
+  releaseDate: string;
+  tracksCount: number;
+}
+
 export const spotifyService = {
   async searchPlaylists(query: string, limit: number = 10): Promise<SpotifyPlaylist[]> {
     const response = await api.get<SpotifyPlaylist[]>('/spotify/search', {
@@ -40,5 +50,36 @@ export const spotifyService = {
 
   isValidSpotifyPlaylistUrl(url: string): boolean {
     return this.extractPlaylistId(url) !== null;
+  },
+
+  async searchAlbums(query: string, limit: number = 10): Promise<SpotifyAlbum[]> {
+    const response = await api.get<SpotifyAlbum[]>('/spotify/search/albums', {
+      params: { q: query, limit },
+    });
+    return response.data;
+  },
+
+  async getAlbumInfo(albumId: string): Promise<SpotifyAlbum | null> {
+    const response = await api.get<SpotifyAlbum | null>('/spotify/album', {
+      params: { id: albumId },
+    });
+    return response.data;
+  },
+
+  extractAlbumId(url: string): string | null {
+    // Formats supportés:
+    // https://open.spotify.com/album/4aawyAB9vmqN3uQ7FjRGTy
+    // spotify:album:4aawyAB9vmqN3uQ7FjRGTy
+    const webMatch = url.match(/album\/([a-zA-Z0-9]+)/);
+    if (webMatch) return webMatch[1];
+
+    const uriMatch = url.match(/spotify:album:([a-zA-Z0-9]+)/);
+    if (uriMatch) return uriMatch[1];
+
+    return null;
+  },
+
+  isValidSpotifyAlbumUrl(url: string): boolean {
+    return this.extractAlbumId(url) !== null;
   },
 };
